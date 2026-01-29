@@ -1,0 +1,91 @@
+<!-- templates/base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ConnectSphere • Your Campus Network{% endblock %}</title>
+    
+    <!-- Tailwind + Flowbite -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="h-full bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-all duration-500">
+
+    <!-- Auto Dark Mode Detection -->
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
+
+    {% if user.is_authenticated %}
+    <!-- Navbar -->
+    <nav class="bg-white dark:bg-gray-900 shadow-2xl border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="{% url 'dashboard' %}" class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">C</div>
+                        <span class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">ConnectSphere</span>
+                    </a>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="{% url 'dashboard' %}" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition">Home</a>
+                        <a href="{% url 'post_list' %}" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition">Feed</a>
+                        <a href="{% url 'community_list' %}" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition">Communities</a>
+                        <a href="/messages/" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition">Messages</a>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-6">
+                    <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                        <i class="fas fa-sun text-yellow-500 dark:hidden"></i>
+                        <i class="fas fa-moon text-purple-400 hidden dark:block"></i>
+                    </button>
+                    <a href="{% url 'profile' user.username %}" class="flex items-center space-x-3 hover:bg-gray-100 dark:hover:bg-gray-800 px-4 py-2 rounded-xl transition">
+                        <!-- <img src="{{ user.profile.avatar.url }}" class="w-10 h-10 rounded-full ring-4 ring-indigo-500/30"> -->
+                        <span class="font-medium">{{ user.username }}</span>
+                    </a>
+                    <a href="{% url 'logout' %}" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-xl font-medium transition">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="min-h-screen">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark')
+                localStorage.theme = 'light'
+            } else {
+                document.documentElement.classList.add('dark')
+                localStorage.theme = 'dark'
+            }
+        }
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+</body>
+</html>

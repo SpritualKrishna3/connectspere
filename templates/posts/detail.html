@@ -1,0 +1,81 @@
+<!-- templates/posts/detail.html -->
+{% extends "base.html" %}
+{% block title %}{{ post.author.username }}'s Post{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-6 py-12">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-3xl p-10 mb-10">
+        <!-- Post Content -->
+        <div class="flex items-center mb-8">
+            <img src="{{ post.author.profile.avatar.url }}" class="w-20 h-20 rounded-full ring-4 ring-indigo-500/30">
+            <div class="ml-6">
+                <h1 class="text-4xl font-bold">{{ post.author.get_full_name|default:post.author.username }}</h1>
+                <p class="text-gray-500">{{ post.created_at|date:"d M Y \a\t h:i A" }}</p>
+            </div>
+        </div>
+
+        <p class="text-2xl text-gray-800 dark:text-gray-200 mb-8">{{ post.content|linebreaks }}</p>
+
+        {% if post.image %}
+            <img src="{{ post.image.url }}" class="w-full rounded-2xl shadow-2xl mb-8">
+        {% endif %}
+
+        {% if post.file %}
+            <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-8 rounded-3xl inline-block shadow-2xl">
+                <a href="{{ post.file.url }}" download class="text-3xl font-bold underline hover:text-yellow-300">
+                    Download File: {{ post.file.name|slice:"30:" }}
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- COMMENT FORM — FULLY WORKING! -->
+    {% if user.is_authenticated %}
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-3xl p-10 mb-10">
+        <h2 class="text-3xl font-bold mb-8">Add a Comment</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="comment_content" value="1"> <!-- Dummy to detect comment -->
+            
+            <textarea name="content" rows="4" 
+                      class="w-full p-6 text-lg border-2 rounded-2xl focus:border-indigo-500 dark:bg-gray-700"
+                      placeholder="Write your comment..."></textarea>
+
+            <div class="flex items-center justify-between mt-6">
+                <label class="cursor-pointer text-3xl text-purple-600 hover:text-purple-700">
+                    <input type="file" name="comment_file" class="hidden">
+                    <i class="fas fa-paperclip"></i>
+                </label>
+                <button type="submit" 
+                        class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-xl px-12 py-5 rounded-full shadow-2xl hover:shadow-purple-500/50 transition transform hover:scale-105">
+                    Post Comment
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Comments List -->
+    <div class="space-y-8">
+        {% for comment in post.comments.all %}
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 flex space-x-6">
+            <img src="{{ comment.author.profile.avatar.url }}" class="w-16 h-16 rounded-full ring-4 ring-indigo-500/30">
+            <div class="flex-1">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-2xl font-bold">{{ comment.author.username }}</h3>
+                    <p class="text-gray-500">{{ comment.created_at|timesince }} ago</p>
+                </div>
+                <p class="text-xl text-gray-700 dark:text-gray-200">{{ comment.content|linebreaks }}</p>
+                {% if comment.file %}
+                    <a href="{{ comment.file.url }}" download class="inline-block mt-4 bg-green-600 text-white px-6 py-4 rounded-full font-bold hover:bg-green-700 transition">
+                        Download File
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center text-3xl text-gray-500 py-20">No comments yet. Be the first!</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+<!-- templates/accounts/edit_profile.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Profile • ConnectSphere{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 py-12">
+    <div class="max-w-4xl mx-auto px-6">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-3xl overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-12 text-white text-center">
+                <h1 class="text-5xl font-extrabold mb-4">Edit Your Profile</h1>
+                <p class="text-xl opacity-90">Make your profile stand out</p>
+            </div>
+
+            <div class="p-12">
+                <form method="post" enctype="multipart/form-data" class="space-y-10">
+                    {% csrf_token %}
+
+                    <!-- Avatar Upload -->
+                    <div class="text-center mb-12">
+                        <div class="relative inline-block">
+                            <img src="{{ request.user.profile.avatar.url }}" 
+                                 class="w-48 h-48 rounded-full object-cover ring-8 ring-white dark:ring-gray-800 shadow-2xl">
+                            
+                            <label class="absolute bottom-4 right-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-5 rounded-full cursor-pointer shadow-2xl hover:shadow-purple-500/50 transition transform hover:scale-110">
+                                <i class="fas fa-camera text-2xl"></i>
+                                <input type="file" name="avatar" accept="image/*" class="hidden">
+                            </label>
+                        </div>
+                        <p class="mt-6 text-2xl font-bold text-gray-800 dark:text-white">
+                            {{ request.user.get_full_name|default:request.user.username }}
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400">@{{ request.user.username }}</p>
+                    </div>
+
+                    <!-- Bio -->
+                    <div class="max-w-2xl mx-auto">
+                        <label class="block text-2xl font-bold text-gray-800 dark:text-white mb-4">
+                            Bio <span class="text-gray-500 text-sm">(Tell us about yourself)</span>
+                        </label>
+                        <textarea name="bio" rows="6" 
+                                  class="w-full p-6 text-lg border-2 border-gray-300 dark:border-gray-600 rounded-2xl 
+                                         focus:border-indigo-500 focus:ring-4 focus:ring-indigo-200 dark:bg-gray-700 
+                                         resize-none transition-all placeholder-gray-500"
+                                  placeholder="I'm a final year CSE student passionate about AI & web development...">{{ request.user.profile.bio }}</textarea>
+                    </div>
+
+                    <!-- Domain / Department -->
+                    <div class="max-w-2xl mx-auto">
+                        <label class="block text-2xl font-bold text-gray-800 dark:text-white mb-4">
+                            Department / Domain
+                        </label>
+                        <select name="domain" class="w-full p-5 text-lg border-2 border-gray-300 dark:border-gray-600 rounded-2xl focus:border-indigo-500 dark:bg-gray-700">
+                            <option value="">-- Choose your domain --</option>
+                            <option {% if request.user.profile.domain == "CSE" %}selected{% endif %}>Computer Science & Engineering</option>
+                            <option {% if request.user.profile.domain == "ECE" %}selected{% endif %}>Electronics & Communication</option>
+                            <option {% if request.user.profile.domain == "ME" %}selected{% endif %}>Mechanical Engineering</option>
+                            <option {% if request.user.profile.domain == "Civil" %}selected{% endif %}>Civil Engineering</option>
+                            <option {% if request.user.profile.domain == "MBA" %}selected{% endif %}>MBA</option>
+                            <option {% if request.user.profile.domain == "Design" %}selected{% endif %}>Design & Arts</option>
+                            <option {% if request.user.profile.domain == "Medical" %}selected{% endif %}>Medical / Healthcare</option>
+                        </select>
+                    </div>
+
+                    <!-- Social Links -->
+                    <div class="max-w-2xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-xl font-bold text-gray-800 dark:text-white mb-3">
+                                <i class="fab fa-github mr-3"></i> GitHub
+                            </label>
+                            <input type="url" name="github" value="{{ request.user.profile.github }}" 
+                                   class="w-full p-5 border-2 border-gray-300 dark:border-gray-600 rounded-2xl focus:border-indigo-500 dark:bg-gray-700"
+                                   placeholder="https://github.com/yourname">
+                        </div>
+                        <div>
+                            <label class="block text-xl font-bold text-gray-800 dark:text-white mb-3">
+                                <i class="fab fa-linkedin mr-3"></i> LinkedIn
+                            </label>
+                            <input type="url" name="linkedin" value="{{ request.user.profile.linkedin }}" 
+                                   class="w-full p-5 border-2 border-gray-300 dark:border-gray-600 rounded-2xl focus:border-indigo-500 dark:bg-gray-700"
+                                   placeholder="https://linkedin.com/in/yourname">
+                        </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="text-center pt-10">
+                        <button type="submit" 
+                                class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 
+                                       hover:from-purple-600 hover:via-pink-600 hover:to-red-600 
+                                       text-white font-bold text-3xl px-20 py-7 rounded-full 
+                                       shadow-3xl transition transform hover:scale-110 hover:shadow-purple-500/50">
+                            Save Profile
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-12">
+                    <a href="{% url 'profile' request.user.username %}" 
+                       class="text-indigo-600 dark:text-indigo-400 font-bold text-xl hover:underline">
+                        ← Back to Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

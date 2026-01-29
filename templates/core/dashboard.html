@@ -1,0 +1,176 @@
+<!-- templates/core/dashboard.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard • ConnectSphere{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Hero Welcome Card -->
+    <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl shadow-2xl p-12 text-white mb-12 relative overflow-hidden">
+        <div class="absolute inset-0 bg-black opacity-20"></div>
+        <div class="relative z-10">
+            <h1 class="text-6xl font-extrabold mb-4 drop-shadow-lg">
+                Hi, {{ user.get_full_name|default:user.username }}!
+            </h1>
+            <p class="text-2xl opacity-90">Welcome back to your campus network</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mt-12">
+                <div class="bg-white/20 backdrop-blur-xl rounded-2xl p-8 text-center transform hover:scale-105 transition">
+                    <p class="text-5xl font-bold">{{ user.posts.count }}</p>
+                    <p class="text-xl opacity-90 mt-2">Total Posts</p>
+                </div>
+                <div class="bg-white/20 backdrop-blur-xl rounded-2xl p-8 text-center transform hover:scale-105 transition">
+                    <p class="text-5xl font-bold">{{ user.communities.count }}</p>
+                    <p class="text-xl opacity-90 mt-2">Communities</p>
+                </div>
+                <div class="bg-white/20 backdrop-blur-xl rounded-2xl p-8 text-center transform hover:scale-105 transition">
+                    <p class="text-5xl font-bold">{{ user.messages_sent.count|default:0 }}</p>
+                    <p class="text-xl opacity-90 mt-2">Messages Sent</p>
+                </div>
+                <div class="bg-white/20 backdrop-blur-xl rounded-2xl p-8 text-center transform hover:scale-105 transition">
+                    <p class="text-5xl font-bold text-green-300">Live</p>
+                    <p class="text-xl opacity-90 mt-2">Online Now</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Layout with Sticky Sidebar -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <!-- Main Feed (Left) -->
+        <div class="lg:col-span-2 space-y-10">
+            <!-- Create Post Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-10 border border-gray-200 dark:border-gray-700">
+                <h2 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white">Share Something New</h2>
+                <form method="post" action="{% url 'create_post' %}" enctype="multipart/form-data" class="space-y-8">
+                    {% csrf_token %}
+                    <textarea name="content" rows="6" 
+                              class="w-full p-6 text-lg border-2 border-gray-300 dark:border-gray-600 rounded-2xl 
+                                     focus:border-indigo-500 focus:ring-4 focus:ring-indigo-200 dark:bg-gray-700 
+                                     resize-none transition-all placeholder-gray-500"
+                              placeholder="What's happening in your campus? Share updates, files, or ideas..."></textarea>
+
+                    <div class="flex flex-wrap gap-6 items-center justify-between">
+                        <div class="flex items-center space-x-8">
+                            <label class="cursor-pointer group">
+                                <input type="file" name="image" accept="image/*" class="hidden">
+                                <div class="p-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl text-white shadow-lg group-hover:shadow-xl transition transform hover:scale-110">
+                                    <i class="fas fa-image text-3xl"></i>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer group">
+                                <input type="file" name="file" class="hidden">
+                                <div class="p-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl text-white shadow-lg group-hover:shadow-xl transition transform hover:scale-110">
+                                    <i class="fas fa-paperclip text-3xl"></i>
+                                </div>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" name="is_important" class="w-6 h-6 text-red-600 rounded focus:ring-red-500">
+                                <span class="text-xl font-bold text-red-600">Mark as Important</span>
+                            </label>
+                        </div>
+                        <button type="submit" 
+                                class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-purple-600 hover:to-pink-600 
+                                       text-white font-bold text-2xl px-12 py-5 rounded-full shadow-2xl 
+                                       transition transform hover:scale-110 hover:shadow-purple-500/50">
+                            Post Now
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Posts Feed -->
+            <div>
+                <h2 class="text-4xl font-extrabold mb-10 text-gray-800 dark:text-white bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    Campus Feed
+                </h2>
+                {% for post in posts %}
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-10 mb-10 border-l-6 {% if post.is_important %}border-red-600{% else %}border-indigo-600{% endif %} hover:shadow-3xl transition">
+                    <a href="{% url 'profile' post.author.username %}" class="flex items-center mb-6 hover:opacity-80 transition">
+                        <img src="{{ post.author.profile.avatar.url }}" class="w-16 h-16 rounded-full ring-4 ring-indigo-500/30 shadow-xl">
+                        <div class="ml-5">
+                            <h3 class="text-2xl font-bold text-gray-800 dark:text-white">{{ post.author.get_full_name|default:post.author.username }}</h3>
+                            <p class="text-gray-500">{{ post.created_at|timesince }} ago</p>
+                        </div>
+                        {% if post.is_important %}
+                            <span class="ml-auto bg-gradient-to-r from-red-600 to-pink-600 text-white px-6 py-3 rounded-full font-bold shadow-lg">IMPORTANT</span>
+                        {% endif %}
+                    </a>
+
+                    <p class="text-xl text-gray-700 dark:text-gray-200 leading-relaxed mb-6">{{ post.content|linebreaks }}</p>
+
+                    {% if post.image %}
+                        <img src="{{ post.image.url }}" class="rounded-2xl shadow-2xl max-h-96 w-full object-cover mb-6">
+                    {% endif %}
+
+                    {% if post.file %}
+                        <div class="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-2xl inline-block shadow-xl">
+                            <p class="text-xl font-bold mb-2">Attached File (Scanned & Safe)</p>
+                            <a href="{{ post.file.url }}" download class="text-2xl font-bold underline hover:text-yellow-300 transition">
+                                {{ post.file.name|slice:"30:" }}
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    <div class="flex items-center space-x-8 mt-8 text-gray-600 dark:text-gray-400">
+                        <button class="hover:text-red-600 font-bold text-xl transition"><i class="fas fa-heart"></i> {{ post.likes.count }}</button>
+                        <a href="#" class="hover:text-indigo-600 font-bold text-xl transition"><i class="fas fa-comment"></i> {{ post.comments.count }}</a>
+                        <button class="hover:text-green-600 font-bold text-xl transition"><i class="fas fa-share"></i> Share</button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-32">
+                    <i class="fas fa-feather-alt text-9xl text-gray-300 mb-8"></i>
+                    <p class="text-4xl font-bold text-gray-500">No posts yet</p>
+                    <p class="text-2xl text-gray-400 mt-4">Be the first to share something!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR — NOW STICKY ON SCROLL! -->
+        <div class="lg:sticky lg:top-24 h-fit space-y-10">
+            <!-- Active Users -->
+            <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700">
+                <h3 class="text-3xl font-bold mb-8 flex items-center text-gray-800 dark:text-white">
+                    <i class="fas fa-circle text-green-500 mr-4 animate-ping"></i>
+                    Active Now
+                </h3>
+                <div class="space-y-6">
+                    {% for member in active_users|slice:":10" %}
+                    <a href="{% url 'profile' member.username %}" class="flex items-center space-x-5 hover:bg-gray-100 dark:hover:bg-gray-700 p-4 rounded-2xl transition transform hover:scale-105">
+                        <div class="relative">
+                            <img src="{{ member.profile.avatar.url }}" class="w-14 h-14 rounded-full ring-4 ring-green-500/30 shadow-xl object-cover">
+                            <div class="absolute bottom-0 right-0 w-5 h-5 bg-green-500 border-4 border-white rounded-full"></div>
+                        </div>
+                        <div>
+                            <p class="font-bold text-lg text-gray-800 dark:text-white">{{ member.get_full_name|default:member.username }}</p>
+                            <p class="text-sm text-green-600 font-bold">Online</p>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <p class="text-center text-gray-500 py-10">No one online right now</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl shadow-2xl p-10 text-white">
+                <h3 class="text-3xl font-bold mb-10">Quick Actions</h3>
+                <div class="space-y-6">
+                    <a href="{% url 'create_community' %}" class="block bg-white/20 backdrop-blur-xl rounded-2xl p-6 text-center font-bold text-xl hover:bg-white/30 transition transform hover:scale-105">
+                        Create Community
+                    </a>
+                    <a href="/messages/" class="block bg-white/20 backdrop-blur-xl rounded-2xl p-6 text-center font-bold text-xl hover:bg-white/30 transition transform hover:scale-105">
+                        Open Messages
+                    </a>
+                    <a href="{% url 'profile' user.username %}" class="block bg-white/20 backdrop-blur-xl rounded-2xl p-6 text-center font-bold text-xl hover:bg-white/30 transition transform hover:scale-105">
+                        View My Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

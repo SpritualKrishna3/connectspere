@@ -1,0 +1,108 @@
+<!-- templates/messaging/inbox.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Messages • ConnectSphere{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden">
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-8 text-white">
+            <h1 class="text-4xl font-extrabold">Your Messages</h1>
+            <p class="text-xl opacity-90 mt-2">Stay connected with your campus</p>
+        </div>
+
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+            {% for conv in conversations %}
+                {% if conv.type == 'direct' %}
+                    <!-- Direct Message -->
+                    {% for participant in conv.conversationparticipant_set.all %}
+                        {% if participant.user != request.user %}
+                            {% with other_user=participant.user %}
+                            <a href="{% url 'direct_message' other_user.id %}" 
+                               class="block hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-200">
+                                <div class="p-6 flex items-center space-x-6">
+                                    <div class="relative">
+                                        <img src="{{ other_user.profile.avatar.url }}" 
+                                             class="w-16 h-16 rounded-2xl ring-4 ring-indigo-500/30 shadow-xl object-cover">
+                                        <div class="absolute bottom-0 right-0 w-5 h-5 bg-green-500 border-4 border-white rounded-full"></div>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white">
+                                            {{ other_user.get_full_name|default:other_user.username }}
+                                        </h3>
+                                        <p class="text-gray-600 dark:text-gray-400">
+                                            {% with last_msg=conv.messages.last %}
+                                                {% if last_msg %}
+                                                    {{ last_msg.sender.username }}: 
+                                                    {% if last_msg.content %}
+                                                        {{ last_msg.content|truncatechars:35 }}
+                                                    {% else %}
+                                                        Sent a file
+                                                    {% endif %}
+                                                {% else %}
+                                                    No messages yet
+                                                {% endif %}
+                                            {% endwith %}
+                                        </p>
+                                    </div>
+                                    {% if conv.unread_count > 0 %}
+                                        <span class="bg-red-600 text-white px-4 py-2 rounded-full font-bold text-lg">
+                                            {{ conv.unread_count }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </a>
+                            {% endwith %}
+                        {% endif %}
+                    {% endfor %}
+
+                {% else %}
+                    <!-- Group Chat -->
+                    <a href="{% url 'group_chat' conv.id %}" 
+                       class="block hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-200">
+                        <div class="p-6 flex items-center space-x-6">
+                            <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl font-bold text-white shadow-xl">
+                                {{ conv.name|slice:":2"|upper }}
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">
+                                    {{ conv.name|default:"Group Chat" }}
+                                    <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                        ({{ conv.conversationparticipant_set.count }} members)
+                                    </span>
+                                </h3>
+                                <p class="text-gray-600 dark:text-gray-400">
+                                    {% with last_msg=conv.messages.last %}
+                                        {% if last_msg %}
+                                            {{ last_msg.sender.username }}: 
+                                            {% if last_msg.content %}
+                                                {{ last_msg.content|truncatechars:35 }}
+                                            {% else %}
+                                                Sent a file
+                                            {% endif %}
+                                        {% else %}
+                                            No messages yet
+                                        {% endif %}
+                                    {% endwith %}
+                                </p>
+                            </div>
+                            {% if conv.unread_count > 0 %}
+                                <span class="bg-red-600 text-white px-4 py-2 rounded-full font-bold text-lg">
+                                    {{ conv.unread_count }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </a>
+                {% endif %}
+            {% empty %}
+                <div class="text-center py-24">
+                    <i class="fas fa-envelope-open text-8xl text-gray-300 mb-6"></i>
+                    <p class="text-3xl text-gray-500 dark:text-gray-400">No conversations yet</p>
+                    <p class="text-xl text-gray-400 mt-4">Start messaging your friends!</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
